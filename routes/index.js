@@ -3,7 +3,8 @@ var crypto = require('crypto'),
     User = require('../models/user.js');
 var express = require('express');
 var router = express.Router();
-
+var multipart = require('connect-multiparty');
+var multipartMiddleware = multipart();
 /* GET home page. */
 router.get('/', function (req, res) {
     Post.get(null, function (err, posts) {
@@ -126,6 +127,25 @@ router.get('/logout', function (req, res) {
     req.session.user = null;
     req.flash('success', '登出成功!');
     res.redirect('/');//跳转到主页
+});
+/**
+ * 文件上传
+ * 加入了是否登录检测
+ */
+router.get('/upload', checkLogin);
+router.get('/upload', function (req, res) {
+    res.render('upload', {
+        title: '文件上传',
+        user: req.session.user,
+        success: req.flash('success').toString(),
+        error: req.flash('error').toString()
+    });
+});
+router.post('/upload', checkLogin);
+router.post('/upload', multipartMiddleware, function (req, res) {
+   //已经可以做进一步处理 req.files
+    req.flash('success', '文件上传成功!');
+    res.redirect('/upload');
 });
 function checkLogin(req, res, next) {
     if (!req.session.user) {

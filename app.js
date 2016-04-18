@@ -11,7 +11,10 @@ var settings = require('./settings');
 var flash = require('connect-flash');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
+
+
 var app = express();
+var multer = require('multer');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -31,6 +34,7 @@ app.use(session({
         url: 'mongodb://localhost/blog'
     })
 }));
+
 /**
  * flash模块
  */
@@ -76,6 +80,15 @@ app.use(function (err, req, res, next) {
         error: {}
     });
 });
-
+function addPermissionChecking(handler) {
+    return function (req, res, next) {
+        // 假设用户信息保存在req.currentUser中
+        if (req.currentUser) {
+            handler.apply(this, arguments);
+        } else {
+            next('权限不足');
+        }
+    };
+}
 
 module.exports = app;
