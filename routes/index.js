@@ -118,6 +118,11 @@ router.get('/post', function (req, res) {
 });
 router.post('/post', checkLogin);
 router.post('/post', function (req, res) {
+    if (req.body.post==undefined){
+        req.flash('error', '字数过长');
+        res.redirect('/post');
+        return;
+    }
     var currentUser = req.session.user,
         tags = [req.body.tag1, req.body.tag2, req.body.tag3],
         post = new Post(currentUser.name, currentUser.head, req.body.title, tags, req.body.post);

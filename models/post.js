@@ -175,7 +175,12 @@ Post.getTen = function (name, page, callback) {
                     }
                     //解析 markdown 为 html
                     docs.forEach(function (doc) {
-                        doc.post = markdown.toHTML(doc.post);
+                        try {
+                            doc.post = markdown.toHTML(doc.post);
+                        }catch (err){
+                            console.log(err);
+                        }
+
                     });
                     callback(null, docs, total);
                 });
