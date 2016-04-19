@@ -12,7 +12,9 @@ var flash = require('connect-flash');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 
-
+var fs = require('fs');
+var accessLog = fs.createWriteStream('access.log', {flags: 'a'});
+var errorLog = fs.createWriteStream('error.log', {flags: 'a'});
 var app = express();
 var multer = require('multer');
 
@@ -32,13 +34,18 @@ app.use(session({
         host: settings.host,
         port: settings.port,
         url: 'mongodb://localhost/blog'
-    })
+    }),
+    resave:false,
+    saveUninitialized:true
+
 }));
 
 /**
  * flash模块
  */
 app.use(flash());
+app.use(logger('dev'));
+app.use(logger('default',{stream: accessLog}));
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -46,7 +53,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+/**
+ * 访问记录，错误记录
+ */
+app.use(function (err, req, res, next) {
+    var meta = '[' + new Date() + '] ' + req.url + '\n';
+    errorLog.write(meta + err.stack + '\n');
+    next();
+});
 app.use('/', routes);
 app.use('/users', users);
 
