@@ -47,7 +47,7 @@ router.post('/reg', function (req, res) {
         return res.redirect('/reg');//返回注册页
     }
     //生成密码的 md5 值
-    var md5 = crypto.createHash('md5'),
+    var md5 = crypto.createHash('md5');
         password = md5.update(req.body.password).digest('hex');
     var newUser = new User({
         name: name,
